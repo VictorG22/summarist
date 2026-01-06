@@ -2,14 +2,43 @@
 
 import { useGetBookByIdQuery } from "@/services/books";
 import Image from "next/image";
-import { BiBookmark, BiMicrophone, BiStar } from "react-icons/bi";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { BiMicrophone, BiStar } from "react-icons/bi";
 import { BsClock, BsFillBookmarkFill } from "react-icons/bs";
 import { GiLightBulb, GiOpenBook } from "react-icons/gi";
-import { RiBookMarkedFill } from "react-icons/ri";
 
 export default function BookDescription() {
-  const { data, error, isLoading } = useGetBookByIdQuery("f9gy1gpai8");
-  console.log(data);
+  const params = useParams();
+  const bookId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
+
+  const { data, error, isLoading } = useGetBookByIdQuery(bookId);
+  const [duration, setDuration] = useState(0);
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+
+  useEffect(() => {
+    if (!data?.audioLink) return;
+
+    const audio = new Audio(data.audioLink);
+
+    // Load metadata to get duration
+    audio.addEventListener("loadedmetadata", () => {
+      setDuration(audio.duration);
+    });
+
+    // Optional cleanup
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
+  }, [data?.audioLink]);
 
   return (
     <div>
@@ -35,7 +64,7 @@ export default function BookDescription() {
                           </div>
                           <div className="flex items-center gap-1 ">
                             <BsClock className="w-6 h-6" />
-                            <p>{`03:32`}</p>
+                            <p>{formatTime(duration)}</p>
                           </div>
                         </div>
 
@@ -53,18 +82,24 @@ export default function BookDescription() {
                     </div>
 
                     <div className="flex gap-4 mb-6">
-                      <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition duration-200">
+                      <Link
+                        href={`/player/${data.id}`}
+                        className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition duration-200"
+                      >
                         <div className="h-12 w-36 bg-[#032b41] rounded-md flex items-center justify-center gap-2">
                           <GiOpenBook color="white" />
                           <p className="text-white text-lg">Read</p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition duration-200">
+                      </Link>
+                      <Link
+                        href={`/player/${data.id}`}
+                        className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition duration-200"
+                      >
                         <div className="h-12 w-36 bg-[#032b41] rounded-md flex items-center justify-center gap-2">
                           <BiMicrophone color="white" />
                           <p className="text-white text-lg">Listen</p>
                         </div>
-                      </div>
+                      </Link>
                     </div>
 
                     <div className="flex items-center gap-2 mb-10">
@@ -114,7 +149,7 @@ export default function BookDescription() {
                 </div>
               </>
             ) : (
-              <>Loading ma g...</>
+              <>Loading...</>
             )}
           </div>
         </div>
