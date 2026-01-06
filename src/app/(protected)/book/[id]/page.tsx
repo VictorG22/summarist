@@ -22,7 +22,6 @@ export default function BookDescription() {
     return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  console.log(bookId);
 
   useEffect(() => {
     if (!data?.audioLink) return;
@@ -150,7 +149,7 @@ export default function BookDescription() {
                 </div>
               </>
             ) : (
-              <>Loading ma g...</>
+              <>Loading...</>
             )}
           </div>
         </div>

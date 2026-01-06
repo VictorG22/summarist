@@ -25,7 +25,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const bookId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
 
-  const { data, isLoading } = useGetBookByIdQuery(bookId, {
+  const { data, error, isLoading } = useGetBookByIdQuery(bookId, {
     skip: !isPlayerPage || !bookId,
   });
 
@@ -48,6 +48,10 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="fixed bottom-0 left-0 w-screen z-50">
               {isLoading ? (
                 <div className="p-4">Loading…</div>
+              ) : error ? (
+                <div className="p-4 bg-red-100 text-red-800">
+                  Failed to load audio player. Please try again.
+                </div>
               ) : (
                 data && <AudioPlayer data={data} />
               )}

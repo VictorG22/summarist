@@ -1,5 +1,4 @@
 "use client";
-import AudioPlayer from "@/app/components/player/AudioPlayer";
 import { useTextSize } from "@/app/context/TextSizeContext";
 import { useGetBookByIdQuery } from "@/services/books";
 import { useParams } from "next/navigation";
@@ -22,14 +21,14 @@ export default function PlayerPage() {
                 {data.title}
               </h1>
               <p
-                className="whitespace-pre-line text-[#032b41] text-[26px] leading-relaxed"
+                className="whitespace-pre-line text-[#032b41] leading-relaxed"
                 style={{ fontSize: `${textSize}px` }}
               >
                 {data.summary}
               </p>
             </>
           ) : (
-            <>Loading ma g.</>
+            <>Loading...</>
           )}
         </div>
       </div>

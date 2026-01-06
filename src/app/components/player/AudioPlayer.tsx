@@ -26,12 +26,16 @@ export default function AudioPlayer({ data }: { data: Book }) {
     const audio = audioRef.current;
     if (!audio) return;
 
+  try {
     if (audio.paused) {
       await audio.play();
     } else {
       audio.pause();
     }
-  };
+  } catch (error) {
+    console.error("Playback failed:", error);
+    setIsPlaying(false);
+  }
 
   const rewind = () => {
     const audio = audioRef.current;
@@ -67,6 +71,11 @@ export default function AudioPlayer({ data }: { data: Book }) {
         }}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        onError={(e) => {
+          console.error("Audio error:", e);
+          setIsPlaying(false);
+        }}
       />
 
       {/* METADATA */}
@@ -136,6 +145,11 @@ export default function AudioPlayer({ data }: { data: Book }) {
           style={{
             background: `linear-gradient(to right, rgb(43,217,124) ${progressPercent}%, #ffffff33 ${progressPercent}%)`,
           }}
+          aria-label="Audio progress"
+          aria-valuemin={0}
+          aria-valuemax={duration || 0}
+          aria-valuenow={currentTime}
+          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
         />
         <p>{formatTime(duration)}</p>
       </div>
