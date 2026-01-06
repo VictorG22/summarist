@@ -26,16 +26,17 @@ export default function AudioPlayer({ data }: { data: Book }) {
     const audio = audioRef.current;
     if (!audio) return;
 
-  try {
-    if (audio.paused) {
-      await audio.play();
-    } else {
-      audio.pause();
+    try {
+      if (audio.paused) {
+        await audio.play();
+      } else {
+        audio.pause();
+      }
+    } catch (error) {
+      console.error("Playback failed:", error);
+      setIsPlaying(false);
     }
-  } catch (error) {
-    console.error("Playback failed:", error);
-    setIsPlaying(false);
-  }
+  };
 
   const rewind = () => {
     const audio = audioRef.current;
