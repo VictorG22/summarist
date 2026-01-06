@@ -12,6 +12,7 @@ import {
 import { CiSettings } from "react-icons/ci";
 import Image from "next/image";
 import { BsHighlighter } from "react-icons/bs";
+import { useTextSize } from "@/app/context/TextSizeContext";
 
 interface SidebarProps {
   open: boolean;
@@ -20,6 +21,12 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const isPlayerPage = pathname.startsWith("/player/");
+
+    const { textSize, setTextSize } = useTextSize();
+
+    const fontSizes = [16, 18, 22, 26];
+
 
   const topLinks = [
     {
@@ -74,7 +81,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   className={`
     bg-[#f7faf9] border-r border-gray-200
     w-56
-    fixed inset-y-0 left-0
+    fixed top-0 left-0
+    ${isPlayerPage ? "bottom-20" : "bottom-0"}
     flex flex-col
     transition-transform duration-300 ease-in-out
     z-40
@@ -82,6 +90,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     md:translate-x-0
   `}
 >
+
   {/* Logo — never scrolls */}
   <div className="flex items-center justify-center py-5 shrink-0">
     <Image
@@ -99,7 +108,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     <div className="flex flex-col min-h-full">
       
       {/* Top links */}
-      <div>
+      <div className="flex flex-col gap-y-2">
         {topLinks.map((link) => {
           const isActive = pathname === link.href;
 
@@ -141,8 +150,28 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         })}
       </div>
 
+{/* TEXT SIZE CHANGER */}
+{pathname.startsWith("/player/") && (
+        <div className="p-4 flex justify-center items-baseline gap-4">
+          {fontSizes.map((size) => (
+            <button
+              key={size}
+              className={`
+                cursor-pointer font-bold
+                transition-all duration-150
+                ${textSize === size ? "text-[#2bd97c]" : "text-[#032b41]"}
+              `}
+              style={{ fontSize: `${size}px` }}
+              onClick={() => setTextSize(size)}
+            >
+              Aa
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Bottom links — pushed down unless overflow */}
-      <div className="mt-auto mb-4">
+      <div className="flex flex-col gap-y-2 mt-auto mb-4">
         {bottomLinks.map((link) => {
           const isActive = pathname === link.href;
 
@@ -183,7 +212,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           );
         })}
       </div>
-
     </div>
   </nav>
 </aside>
