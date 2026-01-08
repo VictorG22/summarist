@@ -1,6 +1,6 @@
 
   export default function Footer() {
-    const blocks = [
+    const linkList = [
       {
         title: "Actions",
         links: [
@@ -36,14 +36,14 @@
 
     return (
       <footer id="footer" className="bg-[#f1f6f4] py-10">
-        <div className="max-w-267.5 w-full mx-auto px-6 flex flex-col md:flex-row justify-between gap-8 mb-16">
-          {blocks.map((block, idx) => (
-            <div key={idx}>
-              <h4 className="text-[#032b41] font-semibold text-lg mb-4">
-                {block.title}
+        <div className="max-w-267.5 w-full mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4  justify-between gap-8 mb-16">
+          {linkList.map((list, index) => (
+            <div key={index}>
+              <h4 className="text-[#032b41] font-bold text-lg mb-4">
+                {list.title}
               </h4>
-              <div className="flex flex-col gap-3">
-                {block.links.map((link, i) => (
+              <div className="flex flex-col gap-1 md:gap-3">
+                {list.links.map((link, i) => (
                   <a
                     key={i}
                     className="text-[#394547] text-sm cursor-not-allowed"
@@ -55,7 +55,7 @@
             </div>
           ))}
         </div>
-        <div className="flex justify-center text-[#032b41] font-medium">
+        <div className="flex justify-center text-[#032b41] font-semibold">
           Copyright &copy; 2023 Summarist.
         </div>
       </footer>
