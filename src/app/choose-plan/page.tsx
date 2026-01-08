@@ -96,7 +96,7 @@ export default function ChoosePlanPage() {
                 : "bg-[#f1f6f4] border-[#bac8cc]"
             }`}
           >
-            <div className="w-6 h-6 rounded-full border-2 border-black flex items-center jusitfy-center">
+            <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center">
               {selectedPlan === "yearly" && (
                 <div className="w-1.5 h-1.5 bg-black rounded-full mx-auto" />
               )}
@@ -129,13 +129,13 @@ export default function ChoosePlanPage() {
                 : "bg-[#f1f6f4] border-[#bac8cc]"
             }`}
           >
-            <div className="w-6 h-6 rounded-full border-2 border-black flex items-center jusitfy-center">
+            <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center">
               {selectedPlan === "monthly" && (
                 <div className="w-1.5 h-1.5 bg-black rounded-full mx-auto" />
               )}
             </div>
             <div className="flex flex-col justify-start-start gap-1">
-              <h3 className="text-[#032b41] font-bold text-bsae md:text-xl">
+              <h3 className="text-[#032b41] font-bold text-base md:text-xl">
                 Premium Monthly
               </h3>
               <p className="text-[#032b41] font-bold text-xl md:text-2xl">$12.99/month</p>
