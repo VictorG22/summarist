@@ -23,7 +23,7 @@ const accordionItems = [
   {
     title: "What's included in the Premium plan?",
     paragraph:
-      "Premium membership provides you with the ultimate Summarist experience, including unrestricted entry to many best-selling books high-quality audio, the ability to download titles for offline reading, and the option to send your reads to your Kindle.",
+      "Premium membership provides you with the ultimate Summarist experience, including unrestricted entry to many best-selling books, high-quality audio, the ability to download titles for offline reading, and the option to send your reads to your Kindle.",
   },
   {
     title: "Can I cancel during my trial or subscription?",
@@ -45,7 +45,7 @@ export default function ChoosePlanPage() {
           <p className="mb-8 text-white text-center text-lg md:text-[20px]">
             Turn ordinary moments into amazing learning opportunities
           </p>
-          <figure className="flex justify-center max-auto">
+          <figure className="flex justify-center mx-auto">
             <Image
               src={"/pricing-top.png"}
               height={340}
@@ -62,7 +62,7 @@ export default function ChoosePlanPage() {
           <div className="flex flex-col items-center mx-auto">
             <PiFileTextFill className="text-[#032b41] h-15 w-15" />
             <p className="text-[#032b41] text-center">
-              <span className="font-bold">Key ideas in few min </span>
+              <span className="font-bold">Key ideas in a few mins </span>
               with many books to read
             </p>
           </div>
@@ -76,7 +76,7 @@ export default function ChoosePlanPage() {
           <div className="flex flex-col items-center mx-auto">
             <FaHandshake className="text-[#032b41] h-15 w-15" />
             <p className="text-[#032b41] text-center">
-              <span className="font-bold">Percise recommendations </span>
+              <span className="font-bold">Precise recommendations </span>
               collections curated by experts
             </p>
           </div>
@@ -88,72 +88,97 @@ export default function ChoosePlanPage() {
           </h2>
 
           <div
-            id="button 1"
-            onClick={() => setSelectedPlan("yearly")}
-            className={`w-full flex gap-6 p-4 md:p-6 rounded-sm cursor-pointer border-4 transition ${
-              selectedPlan === "yearly"
-                ? "bg-[#f1f6f4] border-[#2be080]"
-                : "bg-[#f1f6f4] border-[#bac8cc]"
-            }`}
+            role="radiogroup"
+            aria-label="Choose your subscription plan"
+            className="flex flex-col gap-6"
           >
-            <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center">
-              {selectedPlan === "yearly" && (
-                <div className="w-1.5 h-1.5 bg-black rounded-full mx-auto" />
-              )}
+            
+            <div
+              role="radio"
+              aria-checked={selectedPlan === "yearly"}
+              tabIndex={0}
+              onClick={() => setSelectedPlan("yearly")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ")
+                  setSelectedPlan("yearly");
+              }}
+              className={`w-full flex gap-6 p-4 md:p-6 rounded-sm cursor-pointer border-4 transition ${
+                selectedPlan === "yearly"
+                  ? "bg-[#f1f6f4] border-[#2be080]"
+                  : "bg-[#f1f6f4] border-[#bac8cc]"
+              }`}
+            >
+              <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center">
+                {selectedPlan === "yearly" && (
+                  <div className="w-1.5 h-1.5 bg-black rounded-full mx-auto" />
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-[#032b41] font-bold text-md md:text-xl">
+                  Premium Plus Yearly
+                </h3>
+                <p className="text-[#032b41] font-bold text-xl md:text-2xl">
+                  $89.99/year
+                </p>
+                <p className="text-[#6b757b] text-[14px]">
+                  7-day free trial included
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col justify-start-start gap-1">
-              <h3 className="text-[#032b41] font-bold text-md md:text-xl">
-                Premium Plus Yearly
-              </h3>
-              <p className="text-[#032b41] font-bold text-xl md:text-2xl">$89.99/year</p>
-              <p className="text-[#6b757b] text-[14px]">
-                7-day free trial included
-              </p>
-            </div>
-          </div>
 
-          <div id="separator" className="flex justify-center my-6">
-            <div className="flex items-center gap-2 w-full max-w-60">
-              <div className="flex-1 h-px bg-[#bac8ce]"></div>
-              <p className="text-[#6b757b] text-[14px]">or</p>
-              <div className="flex-1 h-px bg-[#bac8ce]"></div>
+            <div className="flex justify-center my-6">
+              <div className="flex items-center gap-2 w-full max-w-60">
+                <div className="flex-1 h-px bg-[#bac8ce]"></div>
+                <p className="text-[#6b757b] text-[14px]">or</p>
+                <div className="flex-1 h-px bg-[#bac8ce]"></div>
+              </div>
             </div>
-          </div>
 
-          <div
-            id="button 2"
-            onClick={() => setSelectedPlan("monthly")}
-            className={`w-full flex gap-6 p-6 rounded-sm cursor-pointer border-4 transition ${
-              selectedPlan === "monthly"
-                ? "bg-[#f1f6f4] border-[#2be080]"
-                : "bg-[#f1f6f4] border-[#bac8cc]"
-            }`}
-          >
-            <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center">
-              {selectedPlan === "monthly" && (
-                <div className="w-1.5 h-1.5 bg-black rounded-full mx-auto" />
-              )}
-            </div>
-            <div className="flex flex-col justify-start-start gap-1">
-              <h3 className="text-[#032b41] font-bold text-base md:text-xl">
-                Premium Monthly
-              </h3>
-              <p className="text-[#032b41] font-bold text-xl md:text-2xl">$12.99/month</p>
-              <p className="text-[#6b757b] text-[14px]">No trial included</p>
+            <div
+              role="radio"
+              aria-checked={selectedPlan === "monthly"}
+              tabIndex={0}
+              onClick={() => setSelectedPlan("monthly")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ")
+                  setSelectedPlan("monthly");
+              }}
+              className={`w-full flex gap-6 p-6 rounded-sm cursor-pointer border-4 transition ${
+                selectedPlan === "monthly"
+                  ? "bg-[#f1f6f4] border-[#2be080]"
+                  : "bg-[#f1f6f4] border-[#bac8cc]"
+              }`}
+            >
+              <div className="w-6 h-6 rounded-full border-2 border-black flex items-center justify-center">
+                {selectedPlan === "monthly" && (
+                  <div className="w-1.5 h-1.5 bg-black rounded-full mx-auto" />
+                )}
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="text-[#032b41] font-bold text-base md:text-xl">
+                  Premium Monthly
+                </h3>
+                <p className="text-[#032b41] font-bold text-xl md:text-2xl">
+                  $12.99/month
+                </p>
+                <p className="text-[#6b757b] text-[14px]">No trial included</p>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="bg-white py-8 flex flex-col items-center gap-4 sticky bottom-0">
           <button className="min-w-75 h-10 text-[16px] text-[#032b41] bg-[#2be080] hover:bg-[#20ba68] rounded-sm transition duration-200 cursor-pointer">
-            <span>{selectedPlan === 'yearly' 
-            ? "Start your free 7-day trial" 
-            : "Start your first month"}</span>
+            <span>
+              {selectedPlan === "yearly"
+                ? "Start your free 7-day trial"
+                : "Start your first month"}
+            </span>
           </button>
           <p className="text-xs tracking-tight text-gray-500">
-            {selectedPlan === 'yearly' 
-            ? "Cancel your trial at any time before it ends, and you won’t be charged." 
-            : "30-day money back guarantee, no questions asked."}
+            {selectedPlan === "yearly"
+              ? "Cancel your trial at any time before it ends, and you won’t be charged."
+              : "30-day money back guarantee, no questions asked."}
           </p>
         </div>
       </div>
