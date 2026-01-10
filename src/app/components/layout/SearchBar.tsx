@@ -9,27 +9,26 @@ export default function SearchBar() {
 
   return (
     <div className="border-b border-gray-200">
-    <div className="flex items-center py-6 pl-6 px-2 max-w-225 mx-auto">
+      <div className="flex items-center py-6 pl-6 px-2 max-w-225 mx-auto gap-2">
+        <form className="ml-auto flex flex-1 min-w-0 max-w-75 h-10 px-3 border-2 border-[#e1e7ea] rounded-md bg-[#f1f6f4]">
+          <input
+            type="text"
+            placeholder="Search for books"
+            className="flex-1 min-w-0 bg-transparent focus:outline-none"
+          />
 
-      <form action="" 
-      className=" flex items-center justify-between ml-auto min-w-75 h-10 px-3 border-2 border-[#e1e7ea] rounded-md bg-[#f1f6f4]">
-        <input
-          type="text"
-          placeholder="Search for books"
-          className="focus:outline-0"
-        />
-        <button className="border-l-2 border-gray-200 pl-3 h-full">
-          <BiSearchAlt2 className="w-6 h-6 text-[#032b41]"/>
+          <button className="border-l-2 border-gray-200 pl-3 h-full flex items-center">
+            <BiSearchAlt2 className="w-6 h-6 text-[#032b41]" />
+          </button>
+        </form>
+
+        <button
+          onClick={openSidebar}
+          className="md:hidden p-2 rounded-md hover:bg-gray-100 shrink-0"
+        >
+          <FaBars className="w-6 h-6" />
         </button>
-      </form>
-
-      <button
-        onClick={openSidebar}
-        className="md:hidden mx-3 p-2 rounded-md hover:bg-gray-100"
-      >
-        <FaBars className="w-6 h-6 " />
-      </button>
-    </div>
+      </div>
     </div>
   );
 }
