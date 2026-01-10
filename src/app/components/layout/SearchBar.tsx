@@ -156,7 +156,7 @@ export default function SearchBar() {
                   className="p-4 flex gap-4 hover:bg-gray-100 cursor-pointer border-b border-gray-300 last:border-b-0"
                 >
                   <Image
-                    alt=""
+                    alt={`${book.title}`}
                     src={book.imageLink}
                     width={80}
                     height={80}
@@ -174,7 +174,11 @@ export default function SearchBar() {
                   </div>
                 </Link>
               ))
-            ) : (
+            ) : error ? (
+              <p className="bg-red-100 text-red-500 text-center p-4">
+                Something went wrong. Please try again.
+              </p>
+             ) : (
               // No results message
               <p className="text-gray-500 text-center py-4">
                 No results found.
