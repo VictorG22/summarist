@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from 'react';
 
-const headings = ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4'];
-
 export default function HeadingList({headings}: {headings: string[]}) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex(prev => (prev + 1) % headings.length);
-    }, 2000); // change every 2 seconds
-    return () => clearInterval(interval); // cleanup on unmount
+    }, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

@@ -17,7 +17,7 @@ export default function BookCard({ book }: { book: Book }) {
       <p className="text-black leading-tight text-md">{book.subTitle}</p>
       <div className="flex items-center gap-1 text-gray-500 text-sm">
         <BsClock className="" />
-        <p>03.24</p>
+        <p>03:24</p>
         <BiStar className="ml-2" />
         <p>4.4</p>
       </div>
