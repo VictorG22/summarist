@@ -17,11 +17,13 @@ export default function Navbar() {
           />
         </figure>
         <ul className="flex gap-6">
-          <li
-            onClick={() => openModal("login")}
-            className="cursor-pointer text-[#032b41] hover:text-[#2bd97c] transition"
-          >
-            Login
+          <li>
+            <button
+              onClick={() => openModal("login")}
+              className="cursor-pointer text-[#032b41] hover:text-[#2bd97c] transition"
+            >
+              Login
+            </button>
           </li>
           <li className="hidden sm:block cursor-not-allowed text-[#032b41]">
             About

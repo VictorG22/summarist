@@ -24,6 +24,7 @@ export default function AuthModal() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -59,6 +60,7 @@ export default function AuthModal() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null)
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -85,6 +87,7 @@ export default function AuthModal() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null)
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -102,10 +105,11 @@ export default function AuthModal() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null)
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setError("Password reset email sent!");
+      setSuccessMessage("Password reset email sent!");
     } catch (err: unknown) {
       handleError(err);
     } finally {
@@ -116,6 +120,7 @@ export default function AuthModal() {
   const handleGuestLogin = async () => {
     setLoading(true);
     setError(null);
+    setSuccessMessage(null)
 
     try {
       const userCredential = await signInAnonymously(auth);
@@ -144,6 +149,7 @@ export default function AuthModal() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError(null);
+    setSuccessMessage(null)
 
     const provider = new GoogleAuthProvider();
 
@@ -254,6 +260,7 @@ export default function AuthModal() {
           )}
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
+          {successMessage && <p className="text-green-600 text-sm">{successMessage}</p>}
 
           <button
             type="submit"

@@ -28,12 +28,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user);
 
       if (user) {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          setMembership(data.membership);
-          setEmail(data.email); // read mock email here
-        } else {
+        try {
+          const snap = await getDoc(doc(db, "users", user.uid));
+          if (snap.exists()) {
+            const data = snap.data();
+            setMembership(data.membership);
+            setEmail(data.email); // read mock email here
+          } else {
+            setMembership("basic");
+            setEmail(null);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
           setMembership("basic");
           setEmail(null);
         }

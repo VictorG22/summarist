@@ -8,14 +8,13 @@ import { GiPlayButton } from "react-icons/gi";
 
 export function SelectedBook() {
   const { data } = useGetBookByStatusQuery("selected");
-  console.log(data);
 
   return (
     <>
       {data ? (
         <Link
           href={`/book/${data[0].id}`}
-          className="bg-[#fbefd6] flex gap-6 roudned-sm p-6 max-w-200 "
+          className="bg-[#fbefd6] flex gap-6 rounded-sm p-6 max-w-200 "
         >
           <div className="w-[40%]">
             <p>{data[0].subTitle}</p>

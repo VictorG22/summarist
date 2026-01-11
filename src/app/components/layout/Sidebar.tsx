@@ -25,7 +25,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
-  const {openModal} = useAuthModal();
+  const { openModal } = useAuthModal();
   const { user } = useAuth();
   const pathname = usePathname();
   const isPlayerPage = pathname.startsWith("/player/");
@@ -210,8 +210,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             {user ? (
               <button
                 onClick={async () => {
-                  await signOut(auth);
-                  onClose();
+                  try {
+                    await signOut(auth);
+                    onClose();
+                  } catch (error) {
+                    console.error("Failed to sign out:", error);
+                  }
                 }}
                 className="flex items-center h-14 text-[#032b41] hover:bg-[#e6f7f9] w-full"
               >

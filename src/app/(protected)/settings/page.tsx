@@ -15,7 +15,6 @@ export default function Settings() {
     );
   }
 
-  console.log(user);
 
   return (
     <div>
@@ -56,7 +55,7 @@ export default function Settings() {
               <div className="text-lg font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
                 Email
                 <p className="font-normal overflow-x-auto mt-2">
-                  {email || `Guest-${user?.uid?.slice(0, 6)}@summarist.com`}
+                  {email || `Guest-${user?.uid?.slice(0, 6)}@mock.com`}
                 </p>
               </div>
             </>
