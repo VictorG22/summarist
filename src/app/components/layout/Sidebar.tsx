@@ -6,6 +6,7 @@ import {
   BiBookmark,
   BiHelpCircle,
   BiHome,
+  BiLogIn,
   BiLogOut,
   BiSearch,
 } from "react-icons/bi";
@@ -13,6 +14,10 @@ import { CiSettings } from "react-icons/ci";
 import Image from "next/image";
 import { BsHighlighter } from "react-icons/bs";
 import { useTextSize } from "@/app/context/TextSizeContext";
+import { useAuth } from "@/app/context/AuthContext";
+import { signOut } from "firebase/auth";
+import { useAuthModal } from "@/app/context/AuthModalContext";
+import { auth } from "@/lib/firebase/client";
 
 interface SidebarProps {
   open: boolean;
@@ -20,6 +25,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
+  const { openModal } = useAuthModal();
+  const { user } = useAuth();
   const pathname = usePathname();
   const isPlayerPage = pathname.startsWith("/player/");
 
@@ -67,12 +74,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       label: "Help & Support",
       icon: <BiHelpCircle className="w-full h-full" />,
     },
-    {
-      disabled: false,
-      href: "/logout",
-      label: "Logout",
-      icon: <BiLogOut className="w-full h-full" />,
-    },
   ];
 
   return (
@@ -89,7 +90,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     md:translate-x-0
   `}
     >
-      {/* Logo — never scrolls */}
       <div className="flex items-center justify-center py-5 shrink-0">
         <Image
           src="/logo.png"
@@ -100,11 +100,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         />
       </div>
 
-      {/* Nav — scroll container */}
       <nav className="flex-1 overflow-y-auto">
-        {/* This wrapper allows separation until overflow */}
         <div className="flex flex-col min-h-full">
-          {/* Top links */}
           <div className="flex flex-col gap-y-2">
             {topLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -147,12 +144,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             })}
           </div>
 
-          {/* TEXT SIZE CHANGER */}
           {isPlayerPage && (
-            <div 
-            role="group"
-            aria-label="Text size controls"
-            className="p-4 flex justify-center items-baseline gap-4">
+            <div
+              role="group"
+              aria-label="Text size controls"
+              className="p-4 flex justify-center items-baseline gap-4"
+            >
               {fontSizes.map((size) => (
                 <button
                   key={size}
@@ -170,7 +167,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             </div>
           )}
 
-          {/* Bottom links — pushed down unless overflow */}
           <div className="flex flex-col gap-y-2 mt-auto mb-4">
             {bottomLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -211,6 +207,35 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 </Link>
               );
             })}
+            {user ? (
+              <button
+                onClick={async () => {
+                  try {
+                    await signOut(auth);
+                    onClose();
+                  } catch (error) {
+                    console.error("Failed to sign out:", error);
+                  }
+                }}
+                className="flex items-center h-14 text-[#032b41] hover:bg-[#e6f7f9] w-full"
+              >
+                <div className="w-1.5 h-full mr-4 rounded-r-sm bg-transparent" />
+                <BiLogOut className="w-6 h-6 mr-2" />
+                <span className="text-lg">Logout</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  openModal("login");
+                  onClose();
+                }}
+                className="flex items-center h-14 text-[#032b41] hover:bg-[#e6f7f9] w-full"
+              >
+                <div className="w-1.5 h-full mr-4 rounded-r-sm bg-transparent" />
+                <BiLogIn className="w-6 h-6 mr-2" />
+                <span className="text-lg">Login</span>
+              </button>
+            )}
           </div>
         </div>
       </nav>

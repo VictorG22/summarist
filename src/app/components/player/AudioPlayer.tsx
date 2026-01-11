@@ -5,6 +5,7 @@ import Image from "next/image";
 import { CgPlayButton } from "react-icons/cg";
 import { Book } from "@/app/types/Book";
 import { BiPause } from "react-icons/bi";
+import { formatTime } from "@/app/utils/formatTime";
 
 export default function AudioPlayer({ data }: { data: Book }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -14,11 +15,6 @@ export default function AudioPlayer({ data }: { data: Book }) {
 
   const SEEK_OFFSET = 10;
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
 
   const progressPercent = duration ? (currentTime / duration) * 100 : 0;
 

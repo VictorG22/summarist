@@ -1,76 +1,70 @@
 "use client";
-import Image from "next/image";
-import React, { useState } from "react";
+import React from "react";
 import { BsFillStarFill } from "react-icons/bs";
+import { useAuth } from "@/app/context/AuthContext";
+import LoggedOutState from "@/app/components/UI/LoggedOutState";
 
-function Settings() {
-  const [userStatus, setUserStatus] = useState(false);
-  const [userPlan, setUserPlan] = useState("basic");
+export default function Settings() {
+  const { user, email, membership, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <main className="max-w-290 w-full mx-auto px-6 pt-10">
+        <p className="text-center text-[#032b41]">Loading...</p>
+      </main>
+    );
+  }
+
 
   return (
     <div>
       <main className="max-w-290 w-full mx-auto px-6 overflow-y-auto">
         <div className="pt-10 w-full">
-          <div className="mb-6">
-            <h1 className="text-2xl md:text-4xl font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
-              Settings
-            </h1>
-            {userStatus ? (
-              <>
-                <div className="text-lg font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
-                  Your Subscription Plan
-                  <p className="font-normal flex items-center gap-2">
-                    {userPlan === "basic" ? (
-                      <>Basic</>
-                    ) : userPlan === "premium" ? (
-                      <>
-                        Premium <BsFillStarFill color="gold" />
-                      </>
-                    ) : userPlan === "premium-plus" ? (
-                      <>
-                        Premium + <BsFillStarFill color="gold" />{" "}
-                        <BsFillStarFill color="gold" />
-                      </>
+          <h1 className="text-2xl md:text-4xl font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
+            Settings
+          </h1>
+
+          {user ? (
+            <>
+              {/* Subscription Plan */}
+              <div className="text-lg font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
+                Your Subscription Plan
+                <p className="font-normal flex items-center gap-2 mt-2">
+                  {membership === "basic" ? (
+                    user.email?.startsWith("guest-") ? (
+                      "Guest (Basic)"
+                    ) : (
+                      "Basic"
                     )
-                    :
-                    (
+                  ) : membership === "premium" ? (
                     <>
-                    Error Please contact support regarding your status
+                      Premium <BsFillStarFill color="gold" />
                     </>
-                    )}
-                  </p>
-                </div>
-                <div className="text-lg font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
-                  Email
-                  <p className="font-normal overflow-x-auto">guest@guest.com</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex flex-col mx-auto justify-center items-center max-w-115 gap-6">
-                  <Image
-                    src={"/login.png"}
-                    width={460}
-                    height={460}
-                    alt="login image"
-                  />
-                  <h2 className="text-[#032b41] text-2xl font-bold tracking-tight">
-                    Log in to your account to see your details
-                  </h2>
-                  <button
-                    onClick={() => setUserStatus(!userStatus)}
-                    className="max-w-50 w-full bg-[#2bd97c] h-10 rounded-sm text-base hover:bg-[#20ba68] transition duration-200 cursor-pointer"
-                  >
-                    Login
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+                  ) : membership === "premium-plus" ? (
+                    <>
+                      Premium + <BsFillStarFill color="gold" />{" "}
+                      <BsFillStarFill color="gold" />
+                    </>
+                  ) : (
+                    "Error — please contact support"
+                  )}
+                </p>
+              </div>
+
+              {/* Email */}
+              <div className="text-lg font-bold mb-6 text-[#032b41] border-b border-gray-300 pb-6">
+                Email
+                <p className="font-normal overflow-x-auto mt-2">
+                  {email || `Guest-${user?.uid?.slice(0, 6)}@mock.com`}
+                </p>
+              </div>
+            </>
+          ) : (
+            // Logged-out view
+            <LoggedOutState pageTitle="details" />
+          )}
         </div>
       </main>
     </div>
   );
 }
-
-export default Settings;

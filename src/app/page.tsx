@@ -1,3 +1,5 @@
+'use client'
+
 import Image from "next/image";
 import { AiFillFileText, AiFillBulb, AiFillAudio } from "react-icons/ai";
 import { BiCrown } from "react-icons/bi";
@@ -6,38 +8,21 @@ import { RiLeafLine } from "react-icons/ri";
 import Link from "next/link";
 import HeadingList from "./components/layout/HeadingList";
 import Footer from "./components/layout/Footer";
+import Navbar from "./components/layout/Navbar";
+import { useAuth } from "./context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  // --- Navbar ---
-  const Navbar = () => (
-    <nav className="h-20">
-      <div className="flex justify-between items-center max-w-267.5 w-full h-full mx-auto px-6">
-        <figure className="max-w-50">
-          <Image
-            src="/logo.png"
-            alt="logo"
-            width={200}
-            height={80}
-            className="w-full h-full"
-          />
-        </figure>
-        <ul className="flex gap-6">
-          <li className="cursor-pointer text-[#032b41] hover:text-[#2bd97c] transition">
-            Login
-          </li>
-          <li className="hidden sm:block cursor-not-allowed text-[#032b41]">
-            About
-          </li>
-          <li className="hidden sm:block cursor-not-allowed text-[#032b41]">
-            Contact
-          </li>
-          <li className="hidden sm:block cursor-not-allowed text-[#032b41]">
-            Help
-          </li>
-        </ul>
-      </div>
-    </nav>
-  );
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Redirect signed-in users
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/for-you");
+    }
+  }, [user, loading, router]);
 
   // --- Landing ---
   const Landing = () => (
@@ -254,12 +239,12 @@ export default function Home() {
             ))}
           </div>
           <div className="flex justify-center mt-6">
-          <Link
-            className="cursor-pointer bg-[#2bd97c] text-[#032b41] w-full max-w-75 h-10 rounded text-base font-medium flex items-center justify-center hover:bg-[#20ba68] transition"
-            href={"/for-you"}
-          >
-            Login
-          </Link>
+            <Link
+              className="cursor-pointer bg-[#2bd97c] text-[#032b41] w-full max-w-75 h-10 rounded text-base font-medium flex items-center justify-center hover:bg-[#20ba68] transition"
+              href={"/for-you"}
+            >
+              Login
+            </Link>
           </div>
         </div>
       </section>
@@ -322,7 +307,6 @@ export default function Home() {
   };
 
   // --- Footer ---
-
 
   return (
     <div className="max-w-300 mx-auto">
