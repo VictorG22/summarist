@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CgClose } from "react-icons/cg";
+import { formatTime } from "@/app/utils/formatTime";
 
 export default function SearchBar() {
   const pathname = usePathname();
@@ -67,14 +68,7 @@ export default function SearchBar() {
     }
   }, [isFetching]);
 
-  // Format audio duration
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
 
-  // Fetch audio durations dynamically
   useEffect(() => {
     const newDurations: Record<string, string> = {};
     searchResults.forEach((book) => {
@@ -107,9 +101,9 @@ export default function SearchBar() {
             type="button"
             className="border-l-2 border-gray-200 pl-3 h-full flex items-center cursor-pointer"
             onClick={() => {
-              setQuery(""); // clears input immediately
-              setLocalLoading(false); // hides skeleton instantly
-              setDebouncedQuery(""); // reset API skip as well
+              setQuery(""); 
+              setLocalLoading(false);
+              setDebouncedQuery("");
             }}
           >
             {query ? (
@@ -127,11 +121,9 @@ export default function SearchBar() {
           <FaBars className="w-6 h-6" />
         </button>
 
-        {/* Floating Search Results */}
         {debouncedQuery && (
           <div className="absolute top-full right-0 w-full max-w-115 mx-auto mt-2 p-4 bg-white border border-gray-200 shadow-2xl rounded-md overflow-y-auto max-h-125 z-1100">
             {localLoading ? (
-              // Skeleton loading
               Array.from({ length: 5 }).map((_, idx) => (
                 <div
                   key={idx}
@@ -148,7 +140,6 @@ export default function SearchBar() {
                 </div>
               ))
             ) : searchResults.length > 0 ? (
-              // Render actual search results
               searchResults.map((book) => (
                 <Link
                   href={`/book/${book.id}`}
@@ -179,7 +170,6 @@ export default function SearchBar() {
                 Something went wrong. Please try again.
               </p>
              ) : (
-              // No results message
               <p className="text-gray-500 text-center py-4">
                 No results found.
               </p>

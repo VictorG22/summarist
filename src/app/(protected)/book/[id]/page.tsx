@@ -1,8 +1,9 @@
 "use client";
 
+import { formatTime } from "@/app/utils/formatTime";
+import { useBookAccess } from "@/hooks/useBookAccess";
 import { useGetBookByIdQuery } from "@/services/books";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiMicrophone, BiStar } from "react-icons/bi";
@@ -13,14 +14,10 @@ export default function BookDescription() {
   const params = useParams();
   const bookId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
 
-  const { data, error, isLoading } = useGetBookByIdQuery(bookId);
-  const [duration, setDuration] = useState(0);
+  const { handleBookClick } = useBookAccess();
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
+  const { data } = useGetBookByIdQuery(bookId);
+  const [duration, setDuration] = useState(0);
 
 
   useEffect(() => {
@@ -33,7 +30,7 @@ export default function BookDescription() {
       setDuration(audio.duration);
     });
 
-    // Optional cleanup
+    // Cleanup
     return () => {
       audio.pause();
       audio.src = "";
@@ -50,7 +47,10 @@ export default function BookDescription() {
                 <div className="flex max-lg:flex-col-reverse gap-4">
                   <div className="flex flex-col">
                     <div className="mb-6 text-[#032b41] border-b border-gray-300 pb-4 flex flex-col gap-y-4">
-                      <h1 className="text-4xl font-bold"> {data.title} </h1>
+                      <h1 className="text-4xl font-bold">
+                        {data.title}{" "}
+                        {data.subscriptionRequired && "(Premium)"}{" "}
+                      </h1>
                       <h3 className="text-lg font-bold">{data.author}</h3>
                       <h2 className="font-light text-xl">{data.subTitle}</h2>
                     </div>
@@ -82,24 +82,24 @@ export default function BookDescription() {
                     </div>
 
                     <div className="flex gap-4 mb-6">
-                      <Link
-                        href={`/player/${data.id}`}
+                      <div
+                        onClick={() => handleBookClick(data)}
                         className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition duration-200"
                       >
                         <div className="h-12 w-36 bg-[#032b41] rounded-md flex items-center justify-center gap-2">
                           <GiOpenBook color="white" />
                           <p className="text-white text-lg">Read</p>
                         </div>
-                      </Link>
-                      <Link
-                        href={`/player/${data.id}`}
+                      </div>
+                      <div
+                        onClick={() => handleBookClick(data)}
                         className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition duration-200"
                       >
                         <div className="h-12 w-36 bg-[#032b41] rounded-md flex items-center justify-center gap-2">
                           <BiMicrophone color="white" />
                           <p className="text-white text-lg">Listen</p>
                         </div>
-                      </Link>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2 mb-10">
@@ -149,7 +149,60 @@ export default function BookDescription() {
                 </div>
               </>
             ) : (
-              <>Loading...</>
+              <>
+                <div className="pt-10 w-full animate-pulse">
+                  <div className="flex max-lg:flex-col-reverse gap-6">
+                    <div className="flex flex-col flex-1">
+                      <div className="mb-6 border-b border-gray-300 pb-4 space-y-4">
+                        <div className="h-10 w-3/4 bg-gray-200 rounded" />
+                        <div className="h-5 w-1/3 bg-gray-200 rounded" />
+                        <div className="h-6 w-2/3 bg-gray-200 rounded" />
+                      </div>
+
+                      <div className="mb-6 border-b border-gray-300 pb-4 space-y-4">
+                        <div className="flex gap-6">
+                          <div className="h-5 w-40 bg-gray-200 rounded" />
+                          <div className="h-5 w-32 bg-gray-200 rounded" />
+                        </div>
+                        <div className="flex gap-6">
+                          <div className="h-5 w-40 bg-gray-200 rounded" />
+                          <div className="h-5 w-32 bg-gray-200 rounded" />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 mb-6">
+                        <div className="h-12 w-36 bg-gray-300 rounded-md" />
+                        <div className="h-12 w-36 bg-gray-300 rounded-md" />
+                      </div>
+
+                      <div className="h-5 w-48 bg-gray-200 rounded mb-10" />
+
+                      <div className="mb-6 space-y-4">
+                        <div className="h-6 w-40 bg-gray-200 rounded" />
+                        <div className="flex gap-4">
+                          <div className="h-12 w-24 bg-gray-200 rounded" />
+                          <div className="h-12 w-24 bg-gray-200 rounded" />
+                          <div className="h-12 w-24 bg-gray-200 rounded" />
+                        </div>
+                      </div>
+
+                      <div className="mb-6 space-y-3">
+                        <div className="h-4 w-full bg-gray-200 rounded" />
+                        <div className="h-4 w-full bg-gray-200 rounded" />
+                        <div className="h-4 w-5/6 bg-gray-200 rounded" />
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="h-6 w-48 bg-gray-200 rounded" />
+                        <div className="h-4 w-full bg-gray-200 rounded" />
+                        <div className="h-4 w-5/6 bg-gray-200 rounded" />
+                      </div>
+                    </div>
+
+                    <div className="min-w-75 w-75 h-75 bg-gray-300 rounded mx-auto" />
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
