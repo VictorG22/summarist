@@ -12,6 +12,7 @@ import Navbar from "./components/layout/Navbar";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Login from "./components/UI/Login";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -39,12 +40,13 @@ export default function Home() {
             <br className="hidden md:inline" />
             and even people who don’t like to read.
           </p>
-          <Link
+          <Login />
+          {/* <Link
             className="cursor-pointer bg-[#2bd97c] text-[#032b41] w-full max-w-75 h-10 rounded text-base font-medium flex items-center justify-center hover:bg-[#20ba68] transition"
             href={"/for-you"}
           >
             Login
-          </Link>
+          </Link> */}
         </div>
         <figure className="w-full md:w-1/2 flex justify-end mt-6 md:mt-0">
           <Image
