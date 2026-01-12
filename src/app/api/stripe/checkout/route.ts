@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid uid" }, { status: 400 });
     }
 
-    const DOMAIN = process.env.NEXT_PUBLIC_URL!; // must include https:// or http://
+    const DOMAIN = process.env.NEXT_PUBLIC_URL!;
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",

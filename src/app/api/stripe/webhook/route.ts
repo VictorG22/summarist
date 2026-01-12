@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/client";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
@@ -33,33 +34,45 @@ export async function POST(req: NextRequest) {
   const eventSnapshot = await getDoc(eventRef);
   if (eventSnapshot.exists()) return NextResponse.json({ received: true });
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const uid = session.metadata?.uid;
+if (event.type === "checkout.session.completed") {
+  const session = event.data.object as Stripe.Checkout.Session;
+  const uid = session.metadata?.uid;
 
-    if (uid) {
-      const userRef = doc(db, "users", uid);
-      const userSnapshot = await getDoc(userRef);
+  if (!uid) return NextResponse.json({ received: true });
 
-      if (!userSnapshot.exists()) {
-        console.error(`User document not found for uid: ${uid}`);
-        // Still mark as handled to prevent infinite retries
-        await setDoc(eventRef, { handled: true, error: "user_not_found" });
-        return NextResponse.json({ received: true });
-      }
+  const userRef = doc(db, "users", uid);
+  const userSnapshot = await getDoc(userRef);
 
-      await updateDoc(userRef, {
-        membership: "premium",
-        stripeCustomerId: session.customer,
-        stripeSubscriptionId: session.subscription,
-        subscriptionStatus: "active",
-      });
+  if (!userSnapshot.exists()) {
+    console.error(`User document not found for uid: ${uid}`);
+    await setDoc(eventRef, { handled: true, error: "user_not_found" });
+    return NextResponse.json({ received: true });
+  }
 
-      console.log(`User ${uid} upgraded to premium`);
-    }
+  const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+  const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
+
+  if (invoice.status === "paid") {
+    await updateDoc(userRef, {
+      membership: "premium",
+      stripeCustomerId: session.customer,
+      stripeSubscriptionId: subscription.id,
+      subscriptionStatus: "active",
+    });
+    console.log(`User ${uid} upgraded to premium`);
+  } else {
+    console.log(`Subscription invoice not paid for user ${uid}`);
+    await updateDoc(userRef, {
+      subscriptionStatus: "incomplete",
+      stripeCustomerId: session.customer,
+      stripeSubscriptionId: subscription.id,
+    });
   }
 
   await setDoc(eventRef, { handled: true });
+}
+
+
 
   return NextResponse.json({ received: true });
 }
