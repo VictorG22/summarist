@@ -2,7 +2,6 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/client";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
