@@ -1,8 +1,16 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase/client";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import admin from "firebase-admin";
 
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(
+      JSON.parse(process.env.FIREBASE_ADMIN_SDK_KEY!)
+    ),
+  });
+}
+
+const db = admin.firestore();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-12-15.clover",
 });
@@ -25,53 +33,72 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    console.error("Webhook verification failed:", err.message);
+    console.error("Webhook signature verification failed:", err.message);
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 
-  const eventRef = doc(db, "stripeEvents", event.id);
-  const eventSnapshot = await getDoc(eventRef);
-  if (eventSnapshot.exists()) return NextResponse.json({ received: true });
+  try {
+    // Prevent duplicate events
+    const eventRef = db.collection("stripeEvents").doc(event.id);
+    const eventSnapshot = await eventRef.get();
+    if (eventSnapshot.exists) {
+      console.log(`Duplicate Stripe event ignored: ${event.id}`);
+      return NextResponse.json({ received: true });
+    }
 
-if (event.type === "checkout.session.completed") {
-  const session = event.data.object as Stripe.Checkout.Session;
-  const uid = session.metadata?.uid;
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const uid = session.metadata?.uid;
 
-  if (!uid) return NextResponse.json({ received: true });
+      if (!uid) {
+        console.error("Webhook: UID missing in session metadata");
+      } else {
+        const userRef = db.collection("users").doc(uid);
+        const userSnapshot = await userRef.get();
 
-  const userRef = doc(db, "users", uid);
-  const userSnapshot = await getDoc(userRef);
+        if (!userSnapshot.exists) {
+          console.error(`User document not found for uid: ${uid}`);
+        } else if (!session.subscription || typeof session.subscription !== "string") {
+          console.error("Subscription ID missing or invalid in session:", session);
+        } else {
+          // Retrieve subscription & latest invoice
+          const subscription = await stripe.subscriptions.retrieve(session.subscription);
+          const invoiceId = subscription.latest_invoice;
+          
+          if (!invoiceId || typeof invoiceId !== "string") {
+            console.error("Latest invoice ID missing for subscription:", subscription.id);
+          } else {
+            const invoice = await stripe.invoices.retrieve(invoiceId);
 
-  if (!userSnapshot.exists()) {
-    console.error(`User document not found for uid: ${uid}`);
-    await setDoc(eventRef, { handled: true, error: "user_not_found" });
+            if (invoice.status === "paid") {
+              await userRef.update({
+                membership: "premium",
+                stripeCustomerId: session.customer,
+                stripeSubscriptionId: subscription.id,
+                subscriptionStatus: "active",
+              });
+              console.log(`User ${uid} upgraded to premium`);
+            } else {
+              await userRef.update({
+                stripeCustomerId: session.customer,
+                stripeSubscriptionId: subscription.id,
+                subscriptionStatus: "incomplete",
+              });
+              console.log(
+                `Subscription invoice not paid yet for user ${uid}, status: ${invoice.status}`
+              );
+            }
+          }
+        }
+      }
+    }
+
+    await db.collection("stripeEvents").doc(event.id).set({ handled: true });
+    console.log(`Stripe event processed: ${event.id}`);
+
     return NextResponse.json({ received: true });
+  } catch (err: any) {
+    console.error("Webhook processing error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
-
-  const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-  const invoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
-
-  if (invoice.status === "paid") {
-    await updateDoc(userRef, {
-      membership: "premium",
-      stripeCustomerId: session.customer,
-      stripeSubscriptionId: subscription.id,
-      subscriptionStatus: "active",
-    });
-    console.log(`User ${uid} upgraded to premium`);
-  } else {
-    console.log(`Subscription invoice not paid for user ${uid}`);
-    await updateDoc(userRef, {
-      subscriptionStatus: "incomplete",
-      stripeCustomerId: session.customer,
-      stripeSubscriptionId: subscription.id,
-    });
-  }
-
-  await setDoc(eventRef, { handled: true });
-}
-
-
-
-  return NextResponse.json({ received: true });
 }
