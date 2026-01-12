@@ -5,9 +5,11 @@ import Image from "next/image";
 import { PiFileTextFill, PiPlantFill } from "react-icons/pi";
 import FAQ from "../components/UI/FAQ";
 import { FaHandshake } from "react-icons/fa6";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { accordionItems } from "../data/accordionItems";
 import { useAuth } from "../context/AuthContext";
+import { Stripe } from "@stripe/stripe-js";
+import { stripePromise } from "@/lib/stripe/stripe";
+import { useAuthModal } from "../context/AuthModalContext";
 
 type Plan = "yearly" | "monthly";
 
@@ -16,34 +18,41 @@ export default function ChoosePlanPage() {
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
+  const { openModal } = useAuthModal();
 
   const priceIdMap = {
     monthly: "price_1SoYjyD2Re4oUGQwWDLzJxQD",
     yearly: "price_1SoYmMD2Re4oUGQwQBpM4gkO",
   };
 
-  const stripePromise: Promise<Stripe | null> = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-  );
+  const handleCheckout = async (priceId: string) => {
+    if (!user) {
+      openModal("login")
+      return;
+    }
 
-const handleCheckout = async (priceId: string) => {
-  if (!user) return;
+    setLoading(true);
 
-  const response = await fetch("/api/stripe/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ priceId, uid: user.uid }),
-  });
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId, uid: user.uid, email: user.email }),
+      });
 
-  const data = await response.json();
+      const data = await response.json();
 
-  if (data.url) {
-    // Redirect to Stripe Checkout page
-    window.location.href = data.url;
-  } else {
-    console.error("No URL returned from checkout API");
-  }
-};
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("No URL returned from checkout API");
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col justify-between">
@@ -178,9 +187,10 @@ const handleCheckout = async (priceId: string) => {
 
         <div className="bg-white py-8 flex flex-col items-center gap-4 sticky bottom-0">
           <button
-          onClick={() => handleCheckout(priceIdMap[selectedPlan])} 
-          disabled={loading}
-          className="min-w-75 h-10 text-[16px] text-[#032b41] bg-[#2be080] hover:bg-[#20ba68] rounded-sm transition duration-200 cursor-pointer">
+            onClick={() => handleCheckout(priceIdMap[selectedPlan])}
+            disabled={loading}
+            className="min-w-75 h-10 text-[16px] text-[#032b41] bg-[#2be080] hover:bg-[#20ba68] rounded-sm transition duration-200 cursor-pointer"
+          >
             <span>
               {selectedPlan === "yearly"
                 ? "Start your free 7-day trial"

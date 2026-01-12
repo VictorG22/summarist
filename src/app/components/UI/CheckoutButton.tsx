@@ -2,22 +2,32 @@
 
 import { stripePromise } from "@/lib/stripe/stripe";
 
-
 interface CheckoutButtonProps {
-  items: { name: string; price: number; quantity: number }[];
+  priceId: string;
+  uid: string;
+  email?: string;
 }
 
-export default function CheckoutButton({ items }: CheckoutButtonProps) {
+export default function CheckoutButton({
+  priceId,
+  uid,
+  email,
+}: CheckoutButtonProps) {
   const handleCheckout = async () => {
     const stripe = await stripePromise;
 
     const res = await fetch("/api/stripe/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ priceId, uid, email }),
     });
 
     const data = await res.json();
+    if (!res.ok || data.error) {
+      console.error("Checkout error:", data.error);
+      // Consider showing user feedback here
+      return;
+    }
     if (data.url) {
       window.location.href = data.url; // redirect to Stripe checkout
     }
