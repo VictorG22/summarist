@@ -76,6 +76,7 @@ export default function AuthModal() {
       setEmail("");
       setPassword("");
       switchForm("login");
+      closeModal();
     } catch (err: unknown) {
       handleError(err);
     } finally {
