@@ -7,9 +7,11 @@ import { BiStar } from "react-icons/bi";
 import { BsClock } from "react-icons/bs";
 import { useEffect, useState } from "react";
 import { formatTime } from "@/app/utils/formatTime";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function BookCard({ book }: { book: Book }) {
   const [duration, setDuration] = useState<number | null>(null);
+  const { membership } = useAuth();
   
 
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function BookCard({ book }: { book: Book }) {
         <BiStar className="ml-2" />
         <p>{book.averageRating}</p>
       </div>
-      {book.subscriptionRequired && <div className="absolute right-0 top-0 bg-[#032b41] rounded-full text-white px-1 py-px text-[12px]">Premium</div>}
+      {book.subscriptionRequired && membership === 'basic' && <div className="absolute right-0 top-0 bg-[#032b41] rounded-full text-white px-1 py-px text-[12px]">Premium</div>}
     </Link>
   );
 }

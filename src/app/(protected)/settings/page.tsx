@@ -3,6 +3,7 @@ import React from "react";
 import { BsFillStarFill } from "react-icons/bs";
 import { useAuth } from "@/app/context/AuthContext";
 import LoggedOutState from "@/app/components/UI/LoggedOutState";
+import Link from "next/link";
 
 export default function Settings() {
   const { user, email, membership, loading } = useAuth();
@@ -14,7 +15,6 @@ export default function Settings() {
       </main>
     );
   }
-
 
   return (
     <div>
@@ -49,6 +49,17 @@ export default function Settings() {
                     "Error — please contact support"
                   )}
                 </p>
+
+                {membership === "basic" &&
+                <div className="mt-4">
+                <Link
+                href={"/choose-plan"}
+                className="bg-[#2bd97c] font-normal px-4 py-2 rounded-sm transition duration-200 hover:bg-[#27c46b]"
+                >
+                  Upgrade to Premium
+                </Link>
+                  </div>
+                }
               </div>
 
               {/* Email */}

@@ -5,35 +5,60 @@ import Image from "next/image";
 import { PiFileTextFill, PiPlantFill } from "react-icons/pi";
 import FAQ from "../components/UI/FAQ";
 import { FaHandshake } from "react-icons/fa6";
+import { accordionItems } from "../data/accordionItems";
+import { useAuth } from "../context/AuthContext";
+import { Stripe } from "@stripe/stripe-js";
+import { stripePromise } from "@/lib/stripe/stripe";
+import { useAuthModal } from "../context/AuthModalContext";
 
 type Plan = "yearly" | "monthly";
 
-const accordionItems = [
-  {
-    title: "How does the free 7-day trial work?",
-    paragraph:
-      "Begin your complimentary 7-day trial with a Summarist annual membership. You are under no obligation to continue your subscription, and you will only be billed when the trial period expires. With Premium access, you can learn at your own pace and as frequently as you desire, and you may terminate your subscription prior to the conclusion of the 7-day free trial.",
-  },
-  {
-    title:
-      "Can I switch subscriptions from monthly to yearly, or yearly to monthly?",
-    paragraph:
-      "While an annual plan is active, it is not feasible to switch to a monthly plan. However, once the current month ends, transitioning from a monthly plan to an annual plan is an option.",
-  },
-  {
-    title: "What's included in the Premium plan?",
-    paragraph:
-      "Premium membership provides you with the ultimate Summarist experience, including unrestricted entry to many best-selling books, high-quality audio, the ability to download titles for offline reading, and the option to send your reads to your Kindle.",
-  },
-  {
-    title: "Can I cancel during my trial or subscription?",
-    paragraph:
-      "You will not be charged if you cancel your trial before its conclusion. While you will not have complete access to the entire Summarist library, you can still expand your knowledge with one curated book per day.",
-  },
-];
-
 export default function ChoosePlanPage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan>("yearly");
+  const [loading, setLoading] = useState(false);
+
+  const { user } = useAuth();
+  const { openModal } = useAuthModal();
+
+  const priceIdMap = {
+    monthly: "price_1SoYjyD2Re4oUGQwWDLzJxQD",
+    yearly: "price_1SoYmMD2Re4oUGQwQBpM4gkO",
+  };
+
+  const handleCheckout = async (priceId: string) => {
+    if (!user) {
+      openModal("login");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId, uid: user.uid, email: user.email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        console.error("Checkout error:", data.error || response.statusText);
+        setLoading(false);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("No URL returned from checkout API");
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col justify-between">
@@ -92,7 +117,6 @@ export default function ChoosePlanPage() {
             aria-label="Choose your subscription plan"
             className="flex flex-col gap-6"
           >
-            
             <div
               role="radio"
               aria-checked={selectedPlan === "yearly"}
@@ -168,7 +192,11 @@ export default function ChoosePlanPage() {
         </div>
 
         <div className="bg-white py-8 flex flex-col items-center gap-4 sticky bottom-0">
-          <button className="min-w-75 h-10 text-[16px] text-[#032b41] bg-[#2be080] hover:bg-[#20ba68] rounded-sm transition duration-200 cursor-pointer">
+          <button
+            onClick={() => handleCheckout(priceIdMap[selectedPlan])}
+            disabled={loading}
+            className="min-w-75 h-10 text-[16px] text-[#032b41] bg-[#2be080] hover:bg-[#20ba68] rounded-sm transition duration-200 cursor-pointer"
+          >
             <span>
               {selectedPlan === "yearly"
                 ? "Start your free 7-day trial"
