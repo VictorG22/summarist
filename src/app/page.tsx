@@ -12,7 +12,10 @@ import Navbar from "./components/layout/Navbar";
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Login from "./components/UI/Login";
+import LoginBtn from "./components/UI/LoginBtn";
+import { headings1, headings2 } from "./data/headings";
+import { reviews } from "./data/reviews";
+import { stats1, stats2 } from "./data/stats";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -40,13 +43,7 @@ export default function Home() {
             <br className="hidden md:inline" />
             and even people who don’t like to read.
           </p>
-          <Login />
-          {/* <Link
-            className="cursor-pointer bg-[#2bd97c] text-[#032b41] w-full max-w-75 h-10 rounded text-base font-medium flex items-center justify-center hover:bg-[#20ba68] transition"
-            href={"/for-you"}
-          >
-            Login
-          </Link> */}
+          <LoginBtn />
         </div>
         <figure className="w-full md:w-1/2 flex justify-end mt-6 md:mt-0">
           <Image
@@ -103,50 +100,6 @@ export default function Home() {
 
   // --- Statistics ---
   const Statistics = () => {
-    const stats1 = [
-      {
-        number: "93%",
-        text: "of Summarist members significantly increase reading frequency.",
-      },
-      { number: "96%", text: "of Summarist members establish better habits." },
-      {
-        number: "90%",
-        text: "have made significant positive change to their lives.",
-      },
-    ];
-
-    const stats2 = [
-      {
-        number: "91%",
-        text: "of Summarist members report feeling more productive after incorporating the service into their daily routine.",
-      },
-      {
-        number: "94%",
-        text: "of Summarist members have noticed an improvement in their overall comprehension and retention of information.",
-      },
-      {
-        number: "88%",
-        text: "of Summarist members feel more informed about current events and industry trends since using the platform.",
-      },
-    ];
-
-    const headings1 = [
-      "Enhance your knowledge",
-      "Achieve greater success",
-      "Improve your health",
-      "Develop better parenting skills",
-      "Increase happiness",
-      "Be the best version of yourself!",
-    ];
-
-    const headings2 = [
-      "Expand your learning",
-      "Accomplish your goals",
-      "Strengthen your vitality",
-      "Become a better caregiver",
-      "Improve your mood",
-      "Maximize your abilities",
-    ];
 
     return (
       <section id="statistics" className="py-10">
@@ -193,24 +146,6 @@ export default function Home() {
 
   // --- Reviews ---
   const Reviews = () => {
-    const reviews = [
-      {
-        name: "Hanna M.",
-        body: "This app has been a game-changer for me! It's saved me so much time and effort in reading and comprehending books. Highly recommend it to all book lovers.",
-      },
-      {
-        name: "David B.",
-        body: "I love this app! It provides concise and accurate summaries of books in a way that is easy to understand. It's also very user-friendly and intuitive.",
-      },
-      {
-        name: "Nathan S.",
-        body: "This app is a great way to get the main takeaways from a book without having to read the entire thing. The summaries are well-written and informative. Definitely worth downloading.",
-      },
-      {
-        name: "Ryan R.",
-        body: "If you're a busy person who loves reading but doesn't have the time to read every book in full, this app is for you! The summaries are thorough and provide a great overview of the book's content.",
-      },
-    ];
 
     return (
       <section id="reviews" className="py-10">
@@ -241,12 +176,7 @@ export default function Home() {
             ))}
           </div>
           <div className="flex justify-center mt-6">
-            <Link
-              className="cursor-pointer bg-[#2bd97c] text-[#032b41] w-full max-w-75 h-10 rounded text-base font-medium flex items-center justify-center hover:bg-[#20ba68] transition"
-              href={"/for-you"}
-            >
-              Login
-            </Link>
+            <LoginBtn />
           </div>
         </div>
       </section>
