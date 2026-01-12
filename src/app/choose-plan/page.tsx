@@ -27,7 +27,7 @@ export default function ChoosePlanPage() {
 
   const handleCheckout = async (priceId: string) => {
     if (!user) {
-      openModal("login")
+      openModal("login");
       return;
     }
 
@@ -41,6 +41,12 @@ export default function ChoosePlanPage() {
       });
 
       const data = await response.json();
+
+      if (!response.ok || data.error) {
+        console.error("Checkout error:", data.error || response.statusText);
+        setLoading(false);
+        return;
+      }
 
       if (data.url) {
         window.location.href = data.url;

@@ -25,11 +25,10 @@ export default function CheckoutButton({
     const data = await res.json();
     if (!res.ok || data.error) {
       console.error("Checkout error:", data.error);
-      // Consider showing user feedback here
       return;
     }
     if (data.url) {
-      window.location.href = data.url; // redirect to Stripe checkout
+      window.location.href = data.url;
     }
   };
 
