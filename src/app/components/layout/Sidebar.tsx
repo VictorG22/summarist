@@ -42,7 +42,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       icon: <BiHome className="w-full h-full" />,
     },
     {
-      disabled: false,
+      disabled: true,
       href: "/library",
       label: "My Library",
       icon: <BiBookmark className="w-full h-full" />,

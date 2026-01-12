@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/app/components/layout", "src/app/test"  ],
+, "src/app/components/layout", "src/app/test", "src/app/api/stripe/webhook"  ],
   "exclude": ["node_modules"]
 }

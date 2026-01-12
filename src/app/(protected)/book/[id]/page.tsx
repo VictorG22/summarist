@@ -1,18 +1,20 @@
 "use client";
 
+import { useAuth } from "@/app/context/AuthContext";
 import { formatTime } from "@/app/utils/formatTime";
 import { useBookAccess } from "@/hooks/useBookAccess";
 import { useGetBookByIdQuery } from "@/services/books";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BiMicrophone, BiStar } from "react-icons/bi";
+import { BiBookmark, BiMicrophone, BiStar } from "react-icons/bi";
 import { BsClock, BsFillBookmarkFill } from "react-icons/bs";
 import { GiLightBulb, GiOpenBook } from "react-icons/gi";
 
 export default function BookDescription() {
   const params = useParams();
   const bookId = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
+  const { membership } = useAuth();
 
   const { handleBookClick } = useBookAccess();
 
@@ -49,7 +51,7 @@ export default function BookDescription() {
                     <div className="mb-6 text-[#032b41] border-b border-gray-300 pb-4 flex flex-col gap-y-4">
                       <h1 className="text-4xl font-bold">
                         {data.title}{" "}
-                        {data.subscriptionRequired && "(Premium)"}{" "}
+                        {data.subscriptionRequired && membership === 'basic' && "(Premium)"}{" "}
                       </h1>
                       <h3 className="text-lg font-bold">{data.author}</h3>
                       <h2 className="font-light text-xl">{data.subTitle}</h2>
@@ -102,8 +104,8 @@ export default function BookDescription() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-10">
-                      <BsFillBookmarkFill color="blue" />
+                    <div className="flex items-center gap-2 mb-10 cursor-not-allowed">
+                      <BiBookmark color="blue" />
                       <p className="text-lg text-[#0000ff] font-semibold">
                         Saved in My Library
                       </p>
