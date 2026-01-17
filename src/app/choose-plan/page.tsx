@@ -62,10 +62,10 @@ export default function ChoosePlanPage() {
 
   return (
     <div className="flex flex-col justify-between">
-      <div className="mb-6 flex flex-col items-center px-6 pt-12 bg-[#032b41] md:rounded-br-[35%] md:rounded-bl-[35%]">
+      <div className="mb-6 flex flex-col items-center px-6 pt-12 bg-[#032b41] md:rounded-br-[256px] md:rounded-bl-[256px]">
         <div className="max-w-250 mx-auto">
-          <h1 className="mb-8 text-white font-bold capitalize text-center text-2xl md:text-5xl">
-            get unlimited access to many amazing books to read
+          <h1 className="mb-8 text-white font-bold text-center text-2xl md:text-5xl">
+            Get unlimited access to many amazing books to read
           </h1>
           <p className="mb-8 text-white text-center text-lg md:text-[20px]">
             Turn ordinary moments into amazing learning opportunities

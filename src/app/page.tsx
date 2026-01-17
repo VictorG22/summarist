@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import { AiFillFileText, AiFillBulb, AiFillAudio } from "react-icons/ai";
@@ -100,7 +100,6 @@ export default function Home() {
 
   // --- Statistics ---
   const Statistics = () => {
-
     return (
       <section id="statistics" className="py-10">
         <div className="max-w-267.5 w-full mx-auto px-6 flex flex-col gap-16">
@@ -146,7 +145,6 @@ export default function Home() {
 
   // --- Reviews ---
   const Reviews = () => {
-
     return (
       <section id="reviews" className="py-10">
         <div className="max-w-267.5 w-full mx-auto px-6">
@@ -241,14 +239,16 @@ export default function Home() {
   // --- Footer ---
 
   return (
-    <div className="max-w-300 mx-auto">
-      <Navbar />
-      <Landing />
-      <Features />
-      <Statistics />
-      <Reviews />
-      <Numbers />
+    <main>
+      <div className="max-w-300 mx-auto">
+        <Navbar />
+        <Landing />
+        <Features />
+        <Statistics />
+        <Reviews />
+        <Numbers />
+      </div>
       <Footer />
-    </div>
+    </main>
   );
 }

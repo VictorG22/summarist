@@ -6,7 +6,7 @@ export default function Navbar() {
   const { openModal } = useAuthModal();
   return (
     <nav className="h-20">
-      <div className="flex justify-between items-center max-w-267.5 w-full h-full mx-auto px-6">
+      <div className="flex justify-between items-center w-full h-full mx-auto px-6">
         <figure className="max-w-50">
           <Image
             src="/logo.png"
