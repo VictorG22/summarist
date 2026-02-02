@@ -14,6 +14,8 @@ import { formatTime } from "@/app/utils/formatTime";
 
 export default function SearchBar() {
   const pathname = usePathname();
+  const currentBookId = pathname.split("/book/")[1] ?? "";
+
   const { openSidebar } = useSidebar();
 
   const [query, setQuery] = useState("");
@@ -68,7 +70,6 @@ export default function SearchBar() {
     }
   }, [isFetching]);
 
-
   useEffect(() => {
     const newDurations: Record<string, string> = {};
     searchResults.forEach((book) => {
@@ -101,13 +102,13 @@ export default function SearchBar() {
             type="button"
             className="border-l-2 border-gray-200 pl-3 h-full flex items-center cursor-pointer"
             onClick={() => {
-              setQuery(""); 
+              setQuery("");
               setLocalLoading(false);
               setDebouncedQuery("");
             }}
           >
             {query ? (
-              <CgClose className="w-6 h-6 text-[#032b41]"/>
+              <CgClose className="w-6 h-6 text-[#032b41]" />
             ) : (
               <BiSearchAlt2 className="w-6 h-6 text-[#032b41]" />
             )}
@@ -140,36 +141,54 @@ export default function SearchBar() {
                 </div>
               ))
             ) : searchResults.length > 0 ? (
-              searchResults.map((book) => (
-                <Link
-                  href={`/book/${book.id}`}
-                  key={book.id}
-                  className="p-4 flex gap-4 hover:bg-gray-100 cursor-pointer border-b border-gray-300 last:border-b-0"
-                >
-                  <Image
-                    alt={`${book.title}`}
-                    src={book.imageLink}
-                    width={80}
-                    height={80}
-                    className="my-auto"
-                  />
-                  <div className="flex flex-col justify-center gap-1">
-                    <p className="font-bold text-[#032b41] tracking-tight">
-                      {book.title}
-                    </p>
-                    <p className="text-sm text-gray-500">{book.author}</p>
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                      <BsClock />
-                      <p>{durations[book.id] ?? "0:00"}</p>
+              searchResults.map((book) => {
+                const isCurrentBook = book.id === currentBookId;
+
+                return (
+                  <div
+                    key={book.id}
+                    onClick={(e) => {
+                      if (isCurrentBook) {
+                        e.preventDefault();
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(
+                            new CustomEvent("refreshBookPage", {
+                              detail: book.id,
+                            }),
+                          );
+                        }
+                      } else {
+                        // navigate normally
+                        window.location.href = `/book/${book.id}`;
+                      }
+                    }}
+                    className="p-4 flex gap-4 hover:bg-gray-100 cursor-pointer border-b border-gray-300 last:border-b-0"
+                  >
+                    <Image
+                      alt={`${book.title}`}
+                      src={book.imageLink}
+                      width={80}
+                      height={80}
+                      className="my-auto"
+                    />
+                    <div className="flex flex-col justify-center gap-1">
+                      <p className="font-bold text-[#032b41] tracking-tight">
+                        {book.title}
+                      </p>
+                      <p className="text-sm text-gray-500">{book.author}</p>
+                      <div className="flex items-center gap-2 text-gray-500 text-sm">
+                        <BsClock />
+                        <p>{durations[book.id] ?? "0:00"}</p>
+                      </div>
                     </div>
                   </div>
-                </Link>
-              ))
+                );
+              })
             ) : error ? (
               <p className="bg-red-100 text-red-500 text-center p-4">
                 Something went wrong. Please try again.
               </p>
-             ) : (
+            ) : (
               <p className="text-gray-500 text-center py-4">
                 No results found.
               </p>

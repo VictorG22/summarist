@@ -26,22 +26,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      setLoading(true);
 
       if (user) {
         try {
           const snap = await getDoc(doc(db, "users", user.uid));
+
           if (snap.exists()) {
             const data = snap.data();
-            setMembership(data.membership);
-            setEmail(data.email); // read mock email here
+            setMembership(data.membership ?? null); // <-- never force basic
+            setEmail(data.email ?? user.email ?? null);
           } else {
-            setMembership("basic");
-            setEmail(null);
+            // First-time email login, treat as guest temporarily
+            setMembership(null);
+            setEmail(user.email ?? null);
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error);
-          setMembership("basic");
-          setEmail(null);
+          setMembership(null); // keep null until refetch
+          setEmail(user.email ?? null);
         }
       } else {
         setMembership(null);

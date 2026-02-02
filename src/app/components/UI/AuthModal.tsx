@@ -6,66 +6,81 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-  signInAnonymously,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase/client";
+import { auth } from "@/lib/firebase/client";
 import { useState, useRef } from "react";
 import { useAuth } from "@/app/context/AuthContext";
+import { useGuest } from "@/app/context/GuestContext";
 import { useAuthModal } from "@/app/context/AuthModalContext";
+import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase/client";
 
 export default function AuthModal() {
-  const { user, membership } = useAuth(); 
-  const { isOpen, currentForm, closeModal, switchForm } = useAuthModal(); 
+  const { user } = useAuth();
+  const { guestUser, setGuestUser } = useGuest();
+  const { isOpen, currentForm, closeModal, switchForm } = useAuthModal();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
   if (!isOpen) return null;
 
-
-  /** -----------------------------
-   * Close on click outside
-   * -----------------------------
-   */
+  // Close modal on click outside
   const handleClickOutside = (e: React.MouseEvent) => {
     if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
       closeModal();
     }
   };
 
-  /** -----------------------------
-   * ERROR HANDLER
-   * -----------------------------
-   */
-  const handleError = (err: unknown) => {
-    if (err instanceof FirebaseError) setError(err.message);
-    else if (err instanceof Error) setError(err.message);
-    else setError("An unexpected error occurred");
+  // Helper for Firebase errors
+  const handleAuthError = (error: unknown) => {
+    if (error instanceof FirebaseError) {
+      switch (error.code) {
+        case "auth/user-not-found":
+          toast.error("User not found.");
+          return;
+        case "auth/wrong-password":
+          toast.error("Incorrect password.");
+          return;
+        case "auth/email-already-in-use":
+          toast.error("Email already in use.");
+          return;
+        case "auth/popup-closed-by-user":
+          toast.error("Sign-in popup was closed.");
+          return;
+        default:
+          toast.error(error.message);
+          return;
+      }
+    }
+    if (error instanceof Error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.error("Something went wrong.");
   };
 
-  /** -----------------------------
-   * HANDLERS (Login/Signup/Forgot/Guest/Google)
-   * -----------------------------
-   */
+  // Firebase handlers
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null)
-
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // 1️⃣ Create the auth user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
       const newUser = userCredential.user;
 
+      // 2️⃣ Create Firestore doc
       await setDoc(doc(db, "users", newUser.uid), {
         uid: newUser.uid,
         email: newUser.email,
@@ -73,12 +88,15 @@ export default function AuthModal() {
         createdAt: serverTimestamp(),
       });
 
+      toast.success("Account created successfully 🎉");
+
+      // 3️⃣ Clear inputs & close modal
       setEmail("");
       setPassword("");
-      switchForm("login");
+      setGuestUser(null);
       closeModal();
     } catch (err: unknown) {
-      handleError(err);
+      handleAuthError(err);
     } finally {
       setLoading(false);
     }
@@ -87,16 +105,15 @@ export default function AuthModal() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null)
-
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Logged in successfully ✅");
       setEmail("");
       setPassword("");
+      setGuestUser(null);
       closeModal();
     } catch (err: unknown) {
-      handleError(err);
+      handleAuthError(err);
     } finally {
       setLoading(false);
     }
@@ -105,43 +122,11 @@ export default function AuthModal() {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null)
-
     try {
       await sendPasswordResetEmail(auth, email);
-      setSuccessMessage("Password reset email sent!");
+      toast.success("Password reset email sent ✅");
     } catch (err: unknown) {
-      handleError(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGuestLogin = async () => {
-    setLoading(true);
-    setError(null);
-    setSuccessMessage(null)
-
-    try {
-      const userCredential = await signInAnonymously(auth);
-      const guest = userCredential.user;
-
-      const userDocRef = doc(db, "users", guest.uid);
-      const snap = await getDoc(userDocRef);
-
-      if (!snap.exists()) {
-        await setDoc(userDocRef, {
-          uid: guest.uid,
-          email: `guest-${guest.uid}@mock.com`,
-          membership: "basic",
-          createdAt: serverTimestamp(),
-        });
-      }
-
-      closeModal();
-    } catch (err: unknown) {
-      handleError(err);
+      handleAuthError(err);
     } finally {
       setLoading(false);
     }
@@ -149,30 +134,14 @@ export default function AuthModal() {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null)
-
     const provider = new GoogleAuthProvider();
-
     try {
-      const result = await signInWithPopup(auth, provider);
-      const gUser = result.user;
-
-      const userDocRef = doc(db, "users", gUser.uid);
-      const snap = await getDoc(userDocRef);
-
-      if (!snap.exists()) {
-        await setDoc(userDocRef, {
-          uid: gUser.uid,
-          email: gUser.email,
-          membership: "basic",
-          createdAt: serverTimestamp(),
-        });
-      }
-
+      await signInWithPopup(auth, provider);
+      toast.success("Logged in with Google ✅");
+      setGuestUser(null);
       closeModal();
     } catch (err: unknown) {
-      handleError(err);
+      handleAuthError(err);
     } finally {
       setLoading(false);
     }
@@ -191,19 +160,28 @@ export default function AuthModal() {
           {currentForm === "login"
             ? "Log in to Summarist"
             : currentForm === "signup"
-            ? "Sign up to Summarist"
-            : "Reset Password"}
+              ? "Sign up to Summarist"
+              : "Reset Password"}
         </h1>
 
-        {user && (
+        {/* Guest info */}
+        {guestUser && !user && (
           <p className="text-center text-sm text-gray-700 mb-2">
-            Signed in as: {user.isAnonymous ? "Guest" : user.email} ({membership})
+            Signed in as: {guestUser.name}
           </p>
         )}
 
-        {currentForm === "login" && (
+        {/* Continue as Guest button */}
+        {!user && !guestUser && currentForm === "login" && (
           <button
-            onClick={handleGuestLogin}
+            onClick={() => {
+              setGuestUser({
+                name: "Guest",
+                membership: "basic",
+                isGuest: true,
+              });
+              closeModal();
+            }}
             className="relative w-full h-10 rounded-sm bg-blue-800 text-white flex items-center justify-center hover:bg-blue-700 transition duration-200 mb-4"
           >
             <BiUser className="absolute left-2 w-6 h-6" />
@@ -211,95 +189,108 @@ export default function AuthModal() {
           </button>
         )}
 
-        <button
-          onClick={handleGoogleLogin}
-          className="relative w-full h-10 rounded-sm bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition duration-200 mb-4"
-        >
-          <Image
-            width={36}
-            height={36}
-            src="/google.png"
-            alt=""
-            className="absolute left-2 p-1 bg-white rounded-sm"
-          />
-          Continue with Google
-        </button>
+        {/* Google login */}
+        {!user && (
+          <button
+            onClick={handleGoogleLogin}
+            className="relative w-full h-10 rounded-sm bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition duration-200 mb-4"
+          >
+            <Image
+              width={36}
+              height={36}
+              src="/google.png"
+              alt=""
+              className="absolute left-2 p-1 bg-white rounded-sm"
+            />
+            Continue with Google
+          </button>
+        )}
 
-        <div className="flex items-center gap-2 my-2">
-          <div className="flex-1 h-px bg-gray-300" />
-          <span className="text-gray-500 text-sm">or</span>
-          <div className="flex-1 h-px bg-gray-300" />
-        </div>
+        {/* Divider */}
+        {!user && (
+          <div className="flex items-center gap-2 my-2">
+            <div className="flex-1 h-px bg-gray-300" />
+            <span className="text-gray-500 text-sm">or</span>
+            <div className="flex-1 h-px bg-gray-300" />
+          </div>
+        )}
 
-        <form
-          onSubmit={
-            currentForm === "login"
-              ? handleLogin
-              : currentForm === "signup"
-              ? handleSignup
-              : handleForgotPassword
-          }
-          className="flex flex-col gap-3"
-        >
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="border-2 border-gray-300 rounded-sm px-3 h-10 outline-none focus:border-green-400"
-          />
-          {(currentForm === "login" || currentForm === "signup") && (
+        {/* Forms */}
+        {!user && (
+          <form
+            onSubmit={
+              currentForm === "login"
+                ? handleLogin
+                : currentForm === "signup"
+                  ? handleSignup
+                  : handleForgotPassword
+            }
+            className="flex flex-col gap-3"
+          >
             <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="border-2 border-gray-300 rounded-sm px-3 h-10 outline-none focus:border-green-400"
             />
-          )}
+            {(currentForm === "login" || currentForm === "signup") && (
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="border-2 border-gray-300 rounded-sm px-3 h-10 outline-none focus:border-green-400"
+              />
+            )}
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-          {successMessage && <p className="text-green-600 text-sm">{successMessage}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-green-400 text-white h-10 rounded-sm mt-2 hover:bg-green-500 transition duration-200"
-          >
-            {loading
-              ? "Processing..."
-              : currentForm === "login"
-              ? "Login"
-              : currentForm === "signup"
-              ? "Sign Up"
-              : "Reset Password"}
-          </button>
-        </form>
-
-        {currentForm === "login" ? (
-          <div className="flex mt-2">
             <button
-              onClick={() => switchForm("signup")}
-              className="flex-1 h-10 bg-gray-100 hover:bg-gray-200 transition duration-200 text-blue-700 rounded-sm"
+              type="submit"
+              disabled={loading}
+              className="bg-green-400 text-white h-10 rounded-sm mt-2 hover:bg-green-500 transition duration-200"
             >
-              {`Don't have an account?`}
+              {loading
+                ? "Processing..."
+                : currentForm === "login"
+                  ? "Login"
+                  : currentForm === "signup"
+                    ? "Sign Up"
+                    : "Reset Password"}
             </button>
-            <button
-              onClick={() => switchForm("forgot")}
-              className="flex-1 h-10 bg-gray-100 hover:bg-gray-200 transition duration-200 text-blue-700 rounded-sm ml-2"
-            >
-              Forgot Password?
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => switchForm("login")}
-            className="w-full h-10 bg-gray-100 text-blue-700 hover:bg-gray-200 transition duration-200 rounded-sm mt-2"
-          >
-            {currentForm === "signup" ? "Already have an account?" : "Back to login"}
-          </button>
+          </form>
+        )}
+
+        {/* Switch forms */}
+        {!user && (
+          <>
+            {currentForm === "login" ? (
+              <div className="flex mt-2">
+                <button
+                  onClick={() => switchForm("signup")}
+                  className="flex-1 h-10 bg-gray-100 hover:bg-gray-200 transition duration-200 text-blue-700 rounded-sm"
+                >
+                  {"Don't have an account?"}
+                </button>
+                <button
+                  onClick={() => switchForm("forgot")}
+                  className="flex-1 h-10 bg-gray-100 hover:bg-gray-200 transition duration-200 text-blue-700 rounded-sm ml-2"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => switchForm("login")}
+                className="w-full h-10 bg-gray-100 text-blue-700 hover:bg-gray-200 transition duration-200 rounded-sm mt-2"
+              >
+                {currentForm === "signup"
+                  ? "Already have an account?"
+                  : "Back to login"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -55,7 +55,7 @@ export default function BookCard({ book }: { book: Book }) {
         <BiStar className="ml-2" />
         <p>{book.averageRating}</p>
       </div>
-      {book.subscriptionRequired && membership === 'basic' && <div className="absolute right-0 top-0 bg-[#032b41] rounded-full text-white px-1 py-px text-[12px]">Premium</div>}
+      {book.subscriptionRequired && (membership === 'basic' || membership === null) && <div className="absolute right-0 top-0 bg-[#032b41] rounded-full text-white px-1 py-px text-[12px]">Premium</div>}
     </Link>
   );
 }

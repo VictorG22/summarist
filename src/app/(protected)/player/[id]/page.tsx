@@ -2,6 +2,11 @@
 import { useTextSize } from "@/app/context/TextSizeContext";
 import { useGetBookByIdQuery } from "@/services/books";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+import { useAuthModal } from "@/app/context/AuthModalContext";
+import { useEffect } from "react";
+import { useGuest } from "@/app/context/GuestContext";
 
 export default function PlayerPage() {
   const params = useParams();
@@ -9,7 +14,20 @@ export default function PlayerPage() {
 
   const { data, error, isLoading } = useGetBookByIdQuery(bookId);
 
+  const router = useRouter();
+  const { user } = useAuth();
+  const { guestUser } = useGuest();
+  const { openModal } = useAuthModal();
+
   const { textSize } = useTextSize();
+
+  useEffect(() => {
+    // If the user becomes null (logs out), redirect and open modal
+    if (!user || guestUser) {
+      router.push("/for-you");
+      openModal();
+    }
+  }, [user, router, openModal]);
 
   return (
     <div className="flex flex-col w-full">

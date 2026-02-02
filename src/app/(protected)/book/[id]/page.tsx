@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiBookmark, BiMicrophone, BiStar } from "react-icons/bi";
-import { BsClock, BsFillBookmarkFill } from "react-icons/bs";
+import { BsClock } from "react-icons/bs";
 import { GiLightBulb, GiOpenBook } from "react-icons/gi";
 
 export default function BookDescription() {
@@ -18,9 +18,8 @@ export default function BookDescription() {
 
   const { handleBookClick } = useBookAccess();
 
-  const { data } = useGetBookByIdQuery(bookId);
+  const { data, refetch } = useGetBookByIdQuery(bookId);
   const [duration, setDuration] = useState(0);
-
 
   useEffect(() => {
     if (!data?.audioLink) return;
@@ -39,6 +38,30 @@ export default function BookDescription() {
     };
   }, [data?.audioLink]);
 
+  useEffect(() => {
+    const handleRefreshEvent = (e: CustomEvent) => {
+      if (e.detail === bookId) {
+        refetch();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener(
+        "refreshBookPage",
+        handleRefreshEvent as EventListener,
+      );
+    }
+
+    return () => {
+      window.removeEventListener(
+        "refreshBookPage",
+        handleRefreshEvent as EventListener,
+      );
+    };
+  }, [bookId, refetch]);
+
+
   return (
     <div>
       <main className="max-w-290 w-full mx-auto px-6">
@@ -51,7 +74,9 @@ export default function BookDescription() {
                     <div className="mb-6 text-[#032b41] border-b border-gray-300 pb-4 flex flex-col gap-y-4">
                       <h1 className="text-4xl font-bold">
                         {data.title}{" "}
-                        {data.subscriptionRequired && membership === 'basic' && "(Premium)"}{" "}
+                        {data.subscriptionRequired &&
+                          (membership === "basic" || membership === null) &&
+                          "(Premium)"}{" "}
                       </h1>
                       <h3 className="text-lg font-bold">{data.author}</h3>
                       <h2 className="font-light text-xl">{data.subTitle}</h2>
@@ -106,8 +131,8 @@ export default function BookDescription() {
 
                     <div className="flex items-center gap-2 mb-10 cursor-not-allowed">
                       <BiBookmark color="blue" />
-                      <p className="text-lg text-[#0000ff] font-semibold">
-                        Saved in My Library
+                      <p className="text-lg text-[#0000ff] font-semibold hover:line-through">
+                        Save in My Library
                       </p>
                     </div>
 

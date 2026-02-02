@@ -18,6 +18,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { signOut } from "firebase/auth";
 import { useAuthModal } from "@/app/context/AuthModalContext";
 import { auth } from "@/lib/firebase/client";
+import { useGuest } from "@/app/context/GuestContext";
 
 interface SidebarProps {
   open: boolean;
@@ -27,6 +28,7 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { openModal } = useAuthModal();
   const { user } = useAuth();
+  const { setGuestUser, guestUser } = useGuest();
   const pathname = usePathname();
   const isPlayerPage = pathname.startsWith("/player/");
 
@@ -207,11 +209,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 </Link>
               );
             })}
-            {user ? (
+            {user || guestUser ? (
               <button
                 onClick={async () => {
                   try {
                     await signOut(auth);
+                    setGuestUser(null);
                     onClose();
                   } catch (error) {
                     console.error("Failed to sign out:", error);

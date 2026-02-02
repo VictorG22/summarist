@@ -7,9 +7,8 @@ import FAQ from "../components/UI/FAQ";
 import { FaHandshake } from "react-icons/fa6";
 import { accordionItems } from "../data/accordionItems";
 import { useAuth } from "../context/AuthContext";
-import { Stripe } from "@stripe/stripe-js";
-import { stripePromise } from "@/lib/stripe/stripe";
 import { useAuthModal } from "../context/AuthModalContext";
+import { toast } from "sonner";
 
 type Plan = "yearly" | "monthly";
 
@@ -26,7 +25,13 @@ export default function ChoosePlanPage() {
   };
 
   const handleCheckout = async (priceId: string) => {
-    if (!user) {
+    if (!user || user.isAnonymous) {
+      openModal("login");
+      return;
+    }
+
+    if (!user.email) {
+      toast.error("Please sign in with an email-based account.");
       openModal("login");
       return;
     }
@@ -43,7 +48,7 @@ export default function ChoosePlanPage() {
       const data = await response.json();
 
       if (!response.ok || data.error) {
-        console.error("Checkout error:", data.error || response.statusText);
+        toast.error(data.error ?? "Failed to start checkout.");
         setLoading(false);
         return;
       }
@@ -56,6 +61,7 @@ export default function ChoosePlanPage() {
       }
     } catch (error) {
       console.error("Checkout error:", error);
+      toast.error("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
