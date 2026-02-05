@@ -9,6 +9,7 @@ import { accordionItems } from "../data/accordionItems";
 import { useAuth } from "../context/AuthContext";
 import { useAuthModal } from "../context/AuthModalContext";
 import { toast } from "sonner";
+import { useGuest } from "../context/GuestContext";
 
 type Plan = "yearly" | "monthly";
 
@@ -17,6 +18,7 @@ export default function ChoosePlanPage() {
   const [loading, setLoading] = useState(false);
 
   const { user } = useAuth();
+  const { guestUser } = useGuest();
   const { openModal } = useAuthModal();
 
   const priceIdMap = {
@@ -25,7 +27,7 @@ export default function ChoosePlanPage() {
   };
 
   const handleCheckout = async (priceId: string) => {
-    if (!user || user.isAnonymous) {
+    if (!user || guestUser ) {
       openModal("login");
       return;
     }

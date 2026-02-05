@@ -5,7 +5,6 @@ import { AiFillFileText, AiFillBulb, AiFillAudio } from "react-icons/ai";
 import { BiCrown } from "react-icons/bi";
 import { BsStarFill, BsStarHalf } from "react-icons/bs";
 import { RiLeafLine } from "react-icons/ri";
-import Link from "next/link";
 import HeadingList from "./components/layout/HeadingList";
 import Footer from "./components/layout/Footer";
 import Navbar from "./components/layout/Navbar";
@@ -16,17 +15,21 @@ import LoginBtn from "./components/UI/LoginBtn";
 import { headings1, headings2 } from "./data/headings";
 import { reviews } from "./data/reviews";
 import { stats1, stats2 } from "./data/stats";
+import { useGuest } from "./context/GuestContext";
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const { guestUser } = useGuest();
   const router = useRouter();
 
-  // Redirect signed-in users
+  
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && (user || guestUser)) {
       router.replace("/for-you");
     }
-  }, [user, loading, router]);
+  }, [user, loading, guestUser, router]);
+  
+  if (loading) return null;
 
   // --- Landing ---
   const Landing = () => (

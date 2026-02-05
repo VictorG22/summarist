@@ -16,14 +16,10 @@ interface GuestContextType {
 const GuestContext = createContext<GuestContextType | undefined>(undefined);
 
 export const GuestProvider = ({ children }: { children: ReactNode }) => {
-  const [guestUser, setGuestUser] = useState<GuestUser | null>({
-    name: "Guest",
-    membership: "basic",
-    isGuest: true,
-  });
+  const [guestUser, setGuestUser] = useState<GuestUser | null>(null);
 
   return (
-    <GuestContext.Provider value={{ guestUser, setGuestUser }}>
+    <GuestContext.Provider value={{ guestUser , setGuestUser }}>
       {children}
     </GuestContext.Provider>
   );
